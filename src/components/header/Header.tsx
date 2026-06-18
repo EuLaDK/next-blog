@@ -1,7 +1,7 @@
 "use client"
 
 import { Menu, Moon, Search, Sparkles, User, X } from "lucide-react"
-import { usePathname, useRouter } from "next/navigation"
+import { usePathname, useRouter, useSearchParams } from "next/navigation"
 import { useState } from "react"
 
 import { Button } from "@/components/ui/button"
@@ -14,14 +14,8 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
+import { isMenuActive, menus } from "@/components/header/navigation"
 import { cn } from "@/lib/utils"
-
-const menus = [
-  { name: "首页", href: "/" },
-  { name: "文章", href: "/home" },
-  { name: "归档", href: "/home?view=archive" },
-  { name: "关于", href: "/user" },
-]
 
 /**
  * 渲染博客全局顶部导航，并在移动端提供折叠菜单。
@@ -30,7 +24,9 @@ const menus = [
 export const Header = () => {
   const pathname = usePathname()
   const router = useRouter()
+  const searchParams = useSearchParams()
   const [mobileOpen, setMobileOpen] = useState(false)
+  const search = searchParams.toString() ? `?${searchParams.toString()}` : ""
 
   /**
    * 切换页面路由，并在移动端导航后关闭菜单。
@@ -61,7 +57,7 @@ export const Header = () => {
 
         <nav className="hidden items-center gap-1 rounded-full border border-foreground/15 bg-card/70 p-1 lg:flex">
           {menus.map((item) => {
-            const active = item.href === "/" ? pathname === "/" : pathname.startsWith(item.href.split("?")[0])
+            const active = isMenuActive(item, pathname, search)
 
             return (
               <button
