@@ -49,6 +49,17 @@ export type PostFilter = {
   tagSlug?: string
 }
 
+export type ArchiveMonthGroup = {
+  month: string
+  label: string
+  posts: Post[]
+}
+
+export type ArchiveYearGroup = {
+  year: string
+  months: ArchiveMonthGroup[]
+}
+
 export const author: Author = {
   id: "eula",
   name: "EuLa",
@@ -304,4 +315,32 @@ export function getRelatedPosts(posts: Post[], currentPost: Post, limit = 3): Po
     .sort((left, right) => right.score - left.score || right.post.popularityScore - left.post.popularityScore)
     .slice(0, limit)
     .map((item) => item.post)
+}
+
+/**
+ * 按发布时间将文章分组成年份和月份归档。
+ * @param posts 候选文章列表
+ */
+export function getArchiveGroups(posts: Post[]): ArchiveYearGroup[] {
+  const sortedPosts = [...posts].sort((left, right) => right.publishedAt.localeCompare(left.publishedAt))
+  const yearMap = new Map<string, Map<string, Post[]>>()
+
+  for (const post of sortedPosts) {
+    const [year, month] = post.publishedAt.split("-")
+    const monthMap = yearMap.get(year) ?? new Map<string, Post[]>()
+    const monthPosts = monthMap.get(month) ?? []
+
+    monthPosts.push(post)
+    monthMap.set(month, monthPosts)
+    yearMap.set(year, monthMap)
+  }
+
+  return [...yearMap.entries()].map(([year, monthMap]) => ({
+    year,
+    months: [...monthMap.entries()].map(([month, monthPosts]) => ({
+      month,
+      label: `${month} 月`,
+      posts: monthPosts,
+    })),
+  }))
 }

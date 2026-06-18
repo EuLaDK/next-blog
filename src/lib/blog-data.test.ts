@@ -6,6 +6,7 @@ import {
   categories,
   filterPosts,
   getAdjacentPosts,
+  getArchiveGroups,
   getFeaturedPost,
   getPopularPosts,
   getPostBySlug,
@@ -83,5 +84,23 @@ test("getRelatedPosts prefers same-category and shared-tag posts without returni
   assert.deepEqual(
     related.map((post) => post.slug),
     ["color-systems-for-blogs", "markdown-editor-studio"],
+  )
+})
+
+test("getArchiveGroups groups posts by year and month in descending date order", () => {
+  const archiveGroups = getArchiveGroups(allPosts)
+
+  assert.equal(archiveGroups[0].year, "2026")
+  assert.deepEqual(
+    archiveGroups[0].months.map((month) => month.label),
+    ["06 月", "05 月"],
+  )
+  assert.deepEqual(
+    archiveGroups[0].months[0].posts.map((post) => post.slug),
+    ["nextjs-cache-field-notes", "markdown-editor-studio", "designing-reading-systems"],
+  )
+  assert.deepEqual(
+    archiveGroups[0].months[1].posts.map((post) => post.slug),
+    ["auth-boundaries-in-next", "type-safe-blog-models", "color-systems-for-blogs"],
   )
 })
