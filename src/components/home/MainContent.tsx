@@ -1,4 +1,5 @@
 import { ArrowRight, Clock, Eye, Newspaper, Sparkles } from "lucide-react"
+import Link from "next/link"
 
 import { Button } from "@/components/ui/button"
 import { type Announcement, type Category, type Post, type Tag } from "@/lib/blog-data"
@@ -57,6 +58,12 @@ export const MainContent = ({
               <span>{featuredPost.readingTime}</span>
               <span>{featuredPost.views.toLocaleString()} views</span>
             </div>
+            <Button asChild className="mt-8 bg-background text-foreground hover:bg-background/90" variant="secondary">
+              <Link href={`/posts/${featuredPost.slug}`}>
+                开始阅读
+                <ArrowRight className="size-4" />
+              </Link>
+            </Button>
           </div>
           <div className="absolute -bottom-8 right-0 h-28 w-52 -rotate-6 rounded-tl-2xl bg-[oklch(0.82_0.08_174)]" />
           <div className="absolute right-20 top-10 h-16 w-28 rotate-6 rounded-xl border border-background/25" />
@@ -93,8 +100,9 @@ export const MainContent = ({
         {posts.length > 0 ? (
           <div className={cn("mt-4 grid gap-4", dense ? "md:grid-cols-2" : "xl:grid-cols-2")}>
             {posts.map((post) => (
-              <article
+              <Link
                 key={post.slug}
+                href={`/posts/${post.slug}`}
                 className="group min-h-[260px] rounded-2xl border border-foreground/10 bg-background p-4 transition hover:-translate-y-1 hover:border-foreground/40 hover:shadow-[6px_6px_0_rgba(25,25,25,0.08)]"
               >
                 <div className={cn("flex h-28 items-end rounded-xl bg-gradient-to-br p-4", coverClasses[post.cover.accent])}>
@@ -116,7 +124,7 @@ export const MainContent = ({
                     {post.views.toLocaleString()}
                   </span>
                 </div>
-              </article>
+              </Link>
             ))}
           </div>
         ) : (

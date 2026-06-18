@@ -76,7 +76,6 @@ export const BlogExperience = ({ posts, categories, tags, announcement, dense = 
         query={query}
         onQueryChange={setQuery}
         popularPosts={popularPosts}
-        onSelectTag={setTagSlug}
       />
     </div>
   )

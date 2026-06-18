@@ -1,4 +1,5 @@
 import { Bookmark, Flame, Search, SlidersHorizontal, SunMedium } from "lucide-react"
+import Link from "next/link"
 
 import { Button } from "@/components/ui/button"
 import { type Post } from "@/lib/blog-data"
@@ -9,14 +10,13 @@ type RightToolsProps = {
   query: string
   onQueryChange: (value: string) => void
   popularPosts: Post[]
-  onSelectTag: (slug: string | undefined) => void
 }
 
 /**
  * 渲染右侧搜索、热门文章和阅读工具。
  * @param props 搜索词、热门文章和标签筛选回调
  */
-export const RightTools = ({ className, query, onQueryChange, popularPosts, onSelectTag }: RightToolsProps) => {
+export const RightTools = ({ className, query, onQueryChange, popularPosts }: RightToolsProps) => {
   return (
     <aside className={cn("space-y-4 xl:sticky xl:top-20 xl:self-start", className)}>
       <section className="rounded-2xl border border-foreground/15 bg-card/80 p-4 shadow-[6px_6px_0_rgba(25,25,25,0.08)]">
@@ -42,10 +42,9 @@ export const RightTools = ({ className, query, onQueryChange, popularPosts, onSe
         </h2>
         <div className="mt-4 space-y-3">
           {popularPosts.map((post, index) => (
-            <button
+            <Link
               key={post.slug}
-              type="button"
-              onClick={() => onSelectTag(post.tags[0]?.slug)}
+              href={`/posts/${post.slug}`}
               className="flex w-full gap-3 rounded-xl border border-foreground/10 bg-background p-3 text-left transition hover:border-foreground/30"
             >
               <span className="grid size-8 shrink-0 place-items-center rounded-lg bg-foreground text-xs font-black text-background">
@@ -55,7 +54,7 @@ export const RightTools = ({ className, query, onQueryChange, popularPosts, onSe
                 <span className="block truncate text-sm font-bold">{post.title}</span>
                 <span className="mt-1 block text-xs text-muted-foreground">{post.views.toLocaleString()} views</span>
               </span>
-            </button>
+            </Link>
           ))}
         </div>
       </section>
