@@ -252,3 +252,56 @@ export function filterPosts(posts: Post[], filter: PostFilter): Post[] {
     return matchesQuery && matchesCategory && matchesTag
   })
 }
+
+/**
+ * 根据 slug 查找单篇文章。
+ * @param posts 候选文章列表
+ * @param slug 文章唯一标识
+ */
+export function getPostBySlug(posts: Post[], slug: string): Post | undefined {
+  return posts.find((post) => post.slug === slug)
+}
+
+/**
+ * 根据当前文章位置获取上一篇和下一篇。
+ * @param posts 按展示顺序排列的文章列表
+ * @param slug 当前文章唯一标识
+ */
+export function getAdjacentPosts(posts: Post[], slug: string): { previous?: Post; next?: Post } {
+  const currentIndex = posts.findIndex((post) => post.slug === slug)
+
+  if (currentIndex < 0) {
+    return {}
+  }
+
+  return {
+    previous: posts[currentIndex - 1],
+    next: posts[currentIndex + 1],
+  }
+}
+
+/**
+ * 根据分类和共享标签获取相关文章。
+ * @param posts 候选文章列表
+ * @param currentPost 当前文章
+ * @param limit 返回数量
+ */
+export function getRelatedPosts(posts: Post[], currentPost: Post, limit = 3): Post[] {
+  const currentTagSlugs = new Set(currentPost.tags.map((tag) => tag.slug))
+
+  return posts
+    .filter((post) => post.slug !== currentPost.slug)
+    .map((post) => {
+      const sharedTagCount = post.tags.filter((tag) => currentTagSlugs.has(tag.slug)).length
+      const categoryScore = post.category.slug === currentPost.category.slug ? 2 : 0
+
+      return {
+        post,
+        score: categoryScore + sharedTagCount,
+      }
+    })
+    .filter((item) => item.score > 0)
+    .sort((left, right) => right.score - left.score || right.post.popularityScore - left.post.popularityScore)
+    .slice(0, limit)
+    .map((item) => item.post)
+}

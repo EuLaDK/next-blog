@@ -5,8 +5,11 @@ import {
   allPosts,
   categories,
   filterPosts,
+  getAdjacentPosts,
   getFeaturedPost,
   getPopularPosts,
+  getPostBySlug,
+  getRelatedPosts,
   tags,
 } from "./blog-data.ts"
 
@@ -52,4 +55,33 @@ test("mock taxonomy data is connected to posts", () => {
       assert.equal(tagSlugs.has(tag.slug), true)
     }
   }
+})
+
+test("getPostBySlug returns a post by slug and undefined for a missing slug", () => {
+  assert.equal(getPostBySlug(allPosts, "markdown-editor-studio")?.title, "把 Markdown 编辑器做成创作工作台")
+  assert.equal(getPostBySlug(allPosts, "missing-post"), undefined)
+})
+
+test("getAdjacentPosts returns previous and next posts from the current order", () => {
+  assert.deepEqual(
+    {
+      previous: getAdjacentPosts(allPosts, "markdown-editor-studio").previous?.slug,
+      next: getAdjacentPosts(allPosts, "markdown-editor-studio").next?.slug,
+    },
+    {
+      previous: "nextjs-cache-field-notes",
+      next: "designing-reading-systems",
+    },
+  )
+  assert.equal(getAdjacentPosts(allPosts, "nextjs-cache-field-notes").previous, undefined)
+  assert.equal(getAdjacentPosts(allPosts, "color-systems-for-blogs").next, undefined)
+})
+
+test("getRelatedPosts prefers same-category and shared-tag posts without returning current post", () => {
+  const related = getRelatedPosts(allPosts, allPosts[2], 2)
+
+  assert.deepEqual(
+    related.map((post) => post.slug),
+    ["color-systems-for-blogs", "markdown-editor-studio"],
+  )
 })
