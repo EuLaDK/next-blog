@@ -7,6 +7,7 @@ export default defineConfig({
   schema: "prisma/schema.prisma",
   migrations: {
     path: "prisma/migrations",
+    seed: "tsx prisma/seed.ts" // 类似脚本，可以在忘数据库里面插入两条数据
   },
   datasource: {
     url: process.env["DATABASE_URL"],

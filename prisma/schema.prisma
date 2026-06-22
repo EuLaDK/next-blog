@@ -20,11 +20,21 @@ model User {
   posts Post[]
 }
 
-model Post { 
-  id        String     @id @default(cuid()) 
-  title     String
-  content   String?
-  published Boolean @default(false) 
-  author    User    @relation(fields: [authorId], references: [id]) 
-  authorId  String
-} 
+model Post {
+  id              String   @id @default(cuid())
+  slug            String   @unique
+  title           String
+  excerpt         String
+  content         String
+  published       Boolean  @default(false)
+  publishedAt     DateTime?
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+  readingTime     String?
+  views           Int      @default(0)
+  featured        Boolean  @default(false)
+  popularityScore Int      @default(0)
+
+  authorId        String
+  author          User     @relation(fields: [authorId], references: [id])
+}
