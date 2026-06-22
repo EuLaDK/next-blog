@@ -1,4 +1,6 @@
 import { Bookmark, Flame, Search, SlidersHorizontal, SunMedium } from "lucide-react"
+import { useSearchParams } from 'next/navigation'
+import { useEffect, useRef } from "react"
 import Link from "next/link"
 
 import { Button } from "@/components/ui/button"
@@ -17,6 +19,14 @@ type RightToolsProps = {
  * @param props 搜索词、热门文章和标签筛选回调
  */
 export const RightTools = ({ className, query, onQueryChange, popularPosts }: RightToolsProps) => {
+  const searchParams = useSearchParams()
+  const needAutoFocus = !!searchParams.get('focus')
+  const inputRef = useRef<HTMLInputElement>(null)
+  useEffect(() => {
+    if (needAutoFocus && inputRef.current) {
+      inputRef.current.focus()
+    }
+  }, [needAutoFocus])
   return (
     <aside className={cn("space-y-4 xl:sticky xl:top-20 xl:self-start", className)}>
       <section className="rounded-2xl border border-foreground/15 bg-card/80 p-4 shadow-[6px_6px_0_rgba(25,25,25,0.08)]">
@@ -27,6 +37,8 @@ export const RightTools = ({ className, query, onQueryChange, popularPosts }: Ri
           <Search className="size-4 text-muted-foreground" />
           <input
             id="blog-search"
+            ref={inputRef}
+            type="search"
             className="min-w-0 flex-1 bg-transparent text-sm outline-none placeholder:text-muted-foreground"
             value={query}
             onChange={(event) => onQueryChange(event.target.value)}

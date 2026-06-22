@@ -58,6 +58,17 @@ test("mock taxonomy data is connected to posts", () => {
   }
 })
 
+test("mock posts include readable sections for the post preview", () => {
+  for (const post of allPosts) {
+    assert.ok(post.sections.length > 0, `${post.slug} should have at least one section`)
+
+    for (const section of post.sections) {
+      assert.notEqual(section.title.trim(), "", `${post.slug} section title should not be empty`)
+      assert.notEqual(section.body.trim(), "", `${post.slug} section body should not be empty`)
+    }
+  }
+})
+
 test("getPostBySlug returns a post by slug and undefined for a missing slug", () => {
   assert.equal(getPostBySlug(allPosts, "markdown-editor-studio")?.title, "把 Markdown 编辑器做成创作工作台")
   assert.equal(getPostBySlug(allPosts, "missing-post"), undefined)

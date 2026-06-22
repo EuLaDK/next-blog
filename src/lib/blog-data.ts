@@ -19,6 +19,11 @@ export type Tag = {
   name: string
 }
 
+export type PostSection = {
+  title: string
+  body: string
+}
+
 export type Post = {
   slug: string
   title: string
@@ -35,6 +40,7 @@ export type Post = {
     accent: BlogAccent
     label: string
   }
+  sections: PostSection[]
 }
 
 export type Announcement = {
@@ -146,6 +152,20 @@ export const allPosts: Post[] = [
     featured: true,
     popularityScore: 98,
     cover: { accent: "teal", label: "Cache" },
+    sections: [
+      {
+        title: "缓存问题为什么容易出现",
+        body: "公开博客最容易遇到的不是页面打不开，而是文章更新后缓存没有按预期刷新。先把静态页面、动态数据和手动 revalidate 的边界分清楚，后续接真实内容源时就不会反复推倒。",
+      },
+      {
+        title: "首页和详情页的缓存差异",
+        body: "首页通常更适合短周期刷新，因为它承载最新文章、热门文章和归档入口。文章详情页更稳定，可以在发布或编辑完成后再精准刷新对应 slug。",
+      },
+      {
+        title: "后续接入的方向",
+        body: "当 Markdown 或数据库内容接入后，可以把发布动作和 revalidatePath 绑定起来，让内容更新、归档变化和详情页刷新形成一条清晰链路。",
+      },
+    ],
   },
   {
     slug: "markdown-editor-studio",
@@ -160,6 +180,20 @@ export const allPosts: Post[] = [
     featured: false,
     popularityScore: 91,
     cover: { accent: "coral", label: "Editor" },
+    sections: [
+      {
+        title: "编辑器不是输入框",
+        body: "博客后台的 Markdown 编辑器应该服务完整创作流程，而不只是保存一段文本。标题、摘要、标签、封面和发布状态都应该围绕写作动作组织。",
+      },
+      {
+        title: "预览和保存要分开",
+        body: "实时预览关注阅读效果，自动保存关注数据安全。把这两个状态拆开之后，界面就能清楚告诉作者当前内容是草稿、已保存还是等待发布。",
+      },
+      {
+        title: "先做壳子再接数据",
+        body: "当前阶段可以先把编辑工作台的静态结构搭好，后续再接 Prisma、上传和 Markdown 解析，这样每一步都能单独验证。",
+      },
+    ],
   },
   {
     slug: "designing-reading-systems",
@@ -174,6 +208,20 @@ export const allPosts: Post[] = [
     featured: false,
     popularityScore: 88,
     cover: { accent: "yellow", label: "Reading" },
+    sections: [
+      {
+        title: "文章列表只是入口",
+        body: "一个好用的博客不只是把文章排成列表，而是帮助读者快速判断主题、时间、热度和阅读成本。分类、标签和热门文章共同构成阅读地图。",
+      },
+      {
+        title: "扫描优先于装饰",
+        body: "首页的视觉应该有记忆点，但不能牺牲扫描效率。标题层级、卡片密度和工具栏位置都应该让读者更快找到下一篇要读的文章。",
+      },
+      {
+        title: "归档承担时间线索",
+        body: "时间轨道适合承载写作路径，而首页负责推荐和筛选。两者职责分开后，页面就不会在视觉和信息结构上互相抢戏。",
+      },
+    ],
   },
   {
     slug: "auth-boundaries-in-next",
@@ -188,6 +236,20 @@ export const allPosts: Post[] = [
     featured: false,
     popularityScore: 76,
     cover: { accent: "ink", label: "Auth" },
+    sections: [
+      {
+        title: "认证不只在前端判断",
+        body: "后台入口可以在客户端展示登录状态，但真正的权限判断应该放在服务端。这样即使用户绕过界面，也无法直接访问受保护的数据。",
+      },
+      {
+        title: "路由边界要提前规划",
+        body: "公开博客、用户中心和后台工作台可以使用不同的访问边界。先把页面职责分清楚，再接 NextAuth 会更稳。",
+      },
+      {
+        title: "先预留不急着接入",
+        body: "当前用户页和计划页可以作为入口占位，等内容层稳定后再接登录、收藏、草稿和管理权限。",
+      },
+    ],
   },
   {
     slug: "type-safe-blog-models",
@@ -202,6 +264,20 @@ export const allPosts: Post[] = [
     featured: false,
     popularityScore: 71,
     cover: { accent: "teal", label: "Model" },
+    sections: [
+      {
+        title: "模型先服务页面",
+        body: "mock 数据不是随便写的临时内容，它应该尽量贴近未来的后端模型。这样从本地数据切到 Prisma 或 Markdown 时，组件改动会更少。",
+      },
+      {
+        title: "字段要围绕阅读体验",
+        body: "标题、摘要、分类、标签、阅读时间、浏览数和封面信息都直接服务前台展示。正文 sections 则让详情页从固定假内容变成文章自己的内容。",
+      },
+      {
+        title: "替换数据源不替换组件",
+        body: "理想状态是页面从 `blog-data.ts` 切到 `posts.ts` 或 Prisma 查询时，`MainContent`、`ArchiveTimeline` 和 `PostPreview` 都能继续复用。",
+      },
+    ],
   },
   {
     slug: "color-systems-for-blogs",
@@ -216,6 +292,20 @@ export const allPosts: Post[] = [
     featured: false,
     popularityScore: 63,
     cover: { accent: "coral", label: "Color" },
+    sections: [
+      {
+        title: "少量颜色建立识别",
+        body: "个人博客不需要复杂色盘，海绿色、暖黄色、珊瑚色和深墨色已经足够形成视觉记忆。关键是让颜色承担信息层级，而不是到处装饰。",
+      },
+      {
+        title: "正文保持安静",
+        body: "阅读页的正文区域应该尽量稳定，颜色主要用于封面、标签和状态提示。这样页面有个性，但长时间阅读不会疲劳。",
+      },
+      {
+        title: "组件复用统一气质",
+        body: "首页卡片、归档条目和详情页侧栏可以共享同一套边框、圆角和强调色语言，让整个博客看起来像一个完整产品。",
+      },
+    ],
   },
 ]
 

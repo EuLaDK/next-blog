@@ -32,8 +32,9 @@ export const Header = () => {
    * 切换页面路由，并在移动端导航后关闭菜单。
    * @param href 目标页面路径
    */
-  const handleNavigate = (href: string) => {
-    router.push(href)
+  const handleNavigate = (href: string, focus?: boolean) => {
+    const url = focus ? `${href}?focus=${focus}` : href
+    router.push(url)
     setMobileOpen(false)
   }
 
@@ -76,7 +77,7 @@ export const Header = () => {
         </nav>
 
         <div className="flex items-center gap-2">
-          <Button className="hidden sm:inline-flex" variant="outline" size="icon" aria-label="搜索">
+          <Button className="hidden sm:inline-flex" variant="outline" size="icon" aria-label="搜索" onClick={() => handleNavigate('/home', true)}>
             <Search />
           </Button>
           <Button className="hidden sm:inline-flex" variant="outline" size="icon" aria-label="切换主题">
@@ -93,7 +94,7 @@ export const Header = () => {
                 <DropdownMenuLabel>EuLa Studio</DropdownMenuLabel>
                 <DropdownMenuItem onClick={() => handleNavigate("/user")}>个人资料</DropdownMenuItem>
                 <DropdownMenuItem onClick={() => handleNavigate("/home")}>文章列表</DropdownMenuItem>
-                <DropdownMenuItem>写作计划</DropdownMenuItem>
+                <DropdownMenuItem onClick={() => handleNavigate('/plan')}>写作计划</DropdownMenuItem>
               </DropdownMenuGroup>
               <DropdownMenuSeparator />
               <DropdownMenuItem>GitHub</DropdownMenuItem>
@@ -115,16 +116,21 @@ export const Header = () => {
       {mobileOpen ? (
         <div className="border-t border-foreground/10 bg-background/95 px-4 py-3 lg:hidden">
           <nav className="grid gap-2">
-            {menus.map((item) => (
+            {menus.map((item) => {
+              const active = isMenuActive(item, pathname, search)
+              return (
               <button
                 key={item.name}
                 type="button"
                 onClick={() => handleNavigate(item.href)}
-                className="h-11 rounded-xl border border-foreground/10 bg-card px-4 text-left text-sm font-medium"
+                className={cn(
+                  "h-11 rounded-xl border border-foreground/10 bg-card px-4 text-left text-sm font-medium",
+                  active && "bg-foreground text-background hover:bg-foreground",
+                )}
               >
                 {item.name}
               </button>
-            ))}
+            )})}
           </nav>
         </div>
       ) : null}

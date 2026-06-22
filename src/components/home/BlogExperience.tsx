@@ -1,6 +1,6 @@
 "use client"
 
-import { useMemo, useState } from "react"
+import { useMemo, useState, useEffect } from "react"
 
 import { ArchiveTimeline } from "@/components/home/ArchiveTimeline"
 import { LeftMenu } from "@/components/home/LeftMenu"
@@ -42,6 +42,19 @@ export const BlogExperience = ({ posts, categories, tags, announcement, dense = 
     [categorySlug, posts, query, tagSlug],
   )
   const archiveGroups = useMemo(() => getArchiveGroups(filteredPosts), [filteredPosts])
+
+  useEffect(() => {
+  const fetchPostList = async () => {
+    try {
+      const res = await fetch('/api/posts', { cache: 'no-store' })
+      const json = await res.json()
+      console.log(json)
+    } catch (err) {
+      console.error('请求文章列表失败', err)
+    }
+  }
+  fetchPostList()
+}, [])
 
   /**
    * 清空所有本地筛选条件。
