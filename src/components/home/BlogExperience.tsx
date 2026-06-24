@@ -1,6 +1,6 @@
 "use client"
 
-import { useMemo, useState, useEffect } from "react"
+import { useMemo, useState } from "react"
 
 import { ArchiveTimeline } from "@/components/home/ArchiveTimeline"
 import { LeftMenu } from "@/components/home/LeftMenu"
@@ -24,16 +24,29 @@ export type BlogExperienceProps = {
   announcement: Announcement
   dense?: boolean
   view?: "articles" | "archive"
+  initialQuery?: string
+  initialCategorySlug?: string
+  initialTagSlug?: string
 }
 
 /**
  * 管理前台博客的本地搜索、分类和标签筛选状态。
  * @param props 博客文章、分类、标签和公告数据
  */
-export const BlogExperience = ({ posts, categories, tags, announcement, dense = false, view = "articles" }: BlogExperienceProps) => {
-  const [query, setQuery] = useState("")
-  const [categorySlug, setCategorySlug] = useState<string>()
-  const [tagSlug, setTagSlug] = useState<string>()
+export const BlogExperience = ({
+  posts,
+  categories,
+  tags,
+  announcement,
+  dense = false,
+  view = "articles",
+  initialQuery = "",
+  initialCategorySlug,
+  initialTagSlug,
+}: BlogExperienceProps) => {
+  const [query, setQuery] = useState(initialQuery)
+  const [categorySlug, setCategorySlug] = useState<string | undefined>(initialCategorySlug)
+  const [tagSlug, setTagSlug] = useState<string | undefined>(initialTagSlug)
 
   const featuredPost = getFeaturedPost(posts)
   const popularPosts = getPopularPosts(posts, 4)
@@ -42,20 +55,6 @@ export const BlogExperience = ({ posts, categories, tags, announcement, dense = 
     [categorySlug, posts, query, tagSlug],
   )
   const archiveGroups = useMemo(() => getArchiveGroups(filteredPosts), [filteredPosts])
-
-  useEffect(() => {
-  const fetchPostList = async () => {
-    try {
-      const res = await fetch('/api/posts', { cache: 'no-store' })
-      const json = await res.json()
-      console.log(json)
-    } catch (err) {
-      console.error('请求文章列表失败', err)
-    }
-  }
-  fetchPostList()
-}, [])
-
   /**
    * 清空所有本地筛选条件。
    */

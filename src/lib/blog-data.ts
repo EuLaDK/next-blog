@@ -8,10 +8,11 @@ export type Author = {
 }
 
 export type Category = {
+  id?: string
   slug: string
   name: string
-  description: string
-  accent: BlogAccent
+  description: string | null
+  accent: BlogAccent | string
 }
 
 export type Tag = {
@@ -31,13 +32,14 @@ export type Post = {
   category: Category
   tags: Tag[]
   author: Author
+  categoryId?: string
   publishedAt: string
-  readingTime: string
+  readingTime: string | null
   views: number
   featured: boolean
   popularityScore: number
   cover: {
-    accent: BlogAccent
+    accent: BlogAccent | string
     label: string
   }
   sections: PostSection[]
@@ -388,17 +390,17 @@ export function getAdjacentPosts(posts: Post[], slug: string): { previous?: Post
  * @param limit 返回数量
  */
 export function getRelatedPosts(posts: Post[], currentPost: Post, limit = 3): Post[] {
-  const currentTagSlugs = new Set(currentPost.tags.map((tag) => tag.slug))
+  const currentTagSlugs = new Set(currentPost.tags?.map((tag) => tag.slug))
 
   return posts
     .filter((post) => post.slug !== currentPost.slug)
     .map((post) => {
-      const sharedTagCount = post.tags.filter((tag) => currentTagSlugs.has(tag.slug)).length
+      const sharedTagCount = post.tags?.filter((tag) => currentTagSlugs.has(tag.slug)).length
       const categoryScore = post.category.slug === currentPost.category.slug ? 2 : 0
 
       return {
         post,
-        score: categoryScore + sharedTagCount,
+        score: categoryScore + (sharedTagCount || 0),
       }
     })
     .filter((item) => item.score > 0)
@@ -412,7 +414,7 @@ export function getRelatedPosts(posts: Post[], currentPost: Post, limit = 3): Po
  * @param posts 候选文章列表
  */
 export function getArchiveGroups(posts: Post[]): ArchiveYearGroup[] {
-  const sortedPosts = [...posts].sort((left, right) => right.publishedAt.localeCompare(left.publishedAt))
+  const sortedPosts = [...posts].sort((left, right) => right.publishedAt?.localeCompare(left.publishedAt))
   const yearMap = new Map<string, Map<string, Post[]>>()
 
   for (const post of sortedPosts) {

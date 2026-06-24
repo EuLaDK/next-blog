@@ -26,14 +26,12 @@ export function generateStaticParams() {
 const PostPage = async ({ params }: PostPageProps) => {
   const { slug } = await params
   const post = getPostBySlug(allPosts, slug)
-
   if (!post) {
     notFound()
   }
 
   const { previous, next } = getAdjacentPosts(allPosts, post.slug)
   const relatedPosts = getRelatedPosts(allPosts, post, 3)
-
   return <PostPreview post={post} previous={previous} next={next} relatedPosts={relatedPosts} />
 }
 
