@@ -8,10 +8,15 @@ import { getPostSectionId } from "@/components/post/post-sections"
 import { type Post } from "@/lib/blog-data"
 import { cn } from "@/lib/utils"
 
+type PrevNext = {
+  slug: string
+  title: string
+}
+
 type PostPreviewProps = {
   post: Post
-  previous?: Post
-  next?: Post
+  previous: PrevNext | null
+  next: PrevNext | null
   relatedPosts: Post[]
 }
 

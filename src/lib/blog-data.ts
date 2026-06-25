@@ -400,7 +400,7 @@ export function getRelatedPosts(posts: Post[], currentPost: Post, limit = 3): Po
 
       return {
         post,
-        score: categoryScore + (sharedTagCount || 0),
+        score: categoryScore + sharedTagCount,
       }
     })
     .filter((item) => item.score > 0)
