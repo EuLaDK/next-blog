@@ -1,6 +1,6 @@
 "use client"
 
-import { Menu, Moon, Search, Sparkles, User, X } from "lucide-react"
+import { Menu, Moon, Search, Sparkles, User, X, LogIn, LogOut } from "lucide-react"
 import { usePathname, useRouter, useSearchParams } from "next/navigation"
 import { useState } from "react"
 
@@ -15,6 +15,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import { isMenuActive, menus } from "@/components/header/navigation"
+import { LoginDialog } from '@/components/login/Login'
 import { cn } from "@/lib/utils"
 
 /**
@@ -26,6 +27,7 @@ export const Header = () => {
   const router = useRouter()
   const searchParams = useSearchParams()
   const [mobileOpen, setMobileOpen] = useState(false)
+  const [isLoginOpen, setIsLoginOpen] = useState(false)
   const search = searchParams.toString() ? `?${searchParams.toString()}` : ""
 
   /**
@@ -39,6 +41,7 @@ export const Header = () => {
   }
 
   return (
+    <div>
     <header className="sticky top-0 z-40 border-b border-foreground/15 bg-background/80 backdrop-blur-xl">
       <div className="mx-auto flex h-16 w-full max-w-[1480px] items-center justify-between px-4 sm:px-6 lg:px-8">
         <button
@@ -97,8 +100,12 @@ export const Header = () => {
                 <DropdownMenuItem onClick={() => handleNavigate('/plan')}>写作计划</DropdownMenuItem>
               </DropdownMenuGroup>
               <DropdownMenuSeparator />
-              <DropdownMenuItem>GitHub</DropdownMenuItem>
-              <DropdownMenuItem>订阅更新</DropdownMenuItem>
+                <DropdownMenuItem className="text-blue-500" onSelect={() => setIsLoginOpen(true)}>
+                      <LogIn />登录  
+              </DropdownMenuItem>
+              <DropdownMenuItem className="text-red-500">
+                <LogOut />退出登录
+              </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
           <Button
@@ -135,5 +142,6 @@ export const Header = () => {
         </div>
       ) : null}
     </header>
+    <LoginDialog open={isLoginOpen} onOpenChange={setIsLoginOpen} /></div>
   )
 }
