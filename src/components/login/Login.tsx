@@ -1,3 +1,5 @@
+"use client"
+
 // LoginDialog.tsx
 import { Button } from "@/components/ui/button"
 import {
@@ -14,15 +16,40 @@ import {
   InputGroupInput,
 } from "@/components/ui/input-group"
 import { Card } from '@/components/ui/card'
-import { ButtonGroup } from "@/components/ui/button-group"
 import { Input } from "../ui/input"
+import { isMainlandChinaPhoneNumber } from "./phone-validation"
+import { useState } from "react"
+
+const captchaChars = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789"
+
+/**
+ * 生成登录弹窗展示用的图形验证码。
+ * @param length 验证码长度
+ */
+function createCaptchaCode(length = 4): string {
+  return Array.from({ length }, () => captchaChars[Math.floor(Math.random() * captchaChars.length)]).join("")
+}
 
 type LoginDialogProps = {
   open: boolean
   onOpenChange: (open: boolean) => void
 }
 
+function handleLogin() {
+    console.log('登录成果')
+}
+
 export function LoginDialog({ open, onOpenChange }: LoginDialogProps) {
+  const [phoneNumber, setPhoneNumber] = useState("")
+  const [captchaCode, setCaptchaCode] = useState(() => createCaptchaCode())
+  const hasPhoneError = phoneNumber.length > 0 && !isMainlandChinaPhoneNumber(phoneNumber)
+
+  /**
+   * 刷新当前图形验证码内容。
+   */
+  const refreshCaptchaCode = () => {
+    setCaptchaCode(createCaptchaCode())
+  }
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -32,16 +59,38 @@ export function LoginDialog({ open, onOpenChange }: LoginDialogProps) {
           </DialogHeader>
           <div className="flex flex-row mt-5 items-center justify-around">
             <div className="flex flex-col gap-5">
-                <InputGroup className="h-12">
-            <InputGroupInput placeholder="请输入手机号" />
-            <InputGroupAddon>
-              +86
-            </InputGroupAddon>
-          </InputGroup>
-          <ButtonGroup>
+                <div className="space-y-2">
+                  <InputGroup className="h-12">
+                    <InputGroupInput
+                      id={hasPhoneError ? "input-invalid" : "phone-input"}
+                      aria-describedby={hasPhoneError ? "phone-error" : undefined}
+                      aria-invalid={hasPhoneError}
+                      placeholder="请输入手机号"
+                      value={phoneNumber}
+                      onChange={(event) => setPhoneNumber(event.target.value)}
+                    />
+                    <InputGroupAddon>
+                      +86
+                    </InputGroupAddon>
+                  </InputGroup>
+                  {hasPhoneError ? (
+                    <p id="phone-error" className="text-xs font-medium text-destructive">
+                      请输入正确的 11 位中国大陆手机号
+                    </p>
+                  ) : null}
+                </div>
+          <div className="flex flex-row gap-2">
             <Input className="h-12" id="input-button-group" placeholder="请输入验证码" />
-            <Button className="h-12" variant="outline">发送验证码</Button>
-          </ButtonGroup>
+            <button
+              className="h-12 min-w-30 rounded-lg border border-foreground/15 bg-blue-100 px-4 text-center font-mono text-lg font-black tracking-[0.18em] text-foreground transition hover:border-foreground/35 hover:bg-[oklch(0.86_0.07_174)]"
+              type="button"
+              aria-label="刷新验证码"
+              title="点击刷新验证码"
+              onClick={refreshCaptchaCode}
+            >
+              {captchaCode}
+            </button>
+          </div>
             </div>
             <Card className="flex flex-col w-60 h-69 pt-9 px-6 items-center">
                 <div className="w-full flex-1 h-full bg-blue-300">
@@ -58,7 +107,7 @@ export function LoginDialog({ open, onOpenChange }: LoginDialogProps) {
             <DialogClose asChild>
               <Button className="w-25 h-10" type="button" variant="outline">取消</Button>
             </DialogClose>
-            <Button className="w-25 h-10" type="submit">登录</Button>
+            <Button className="w-25 h-10" type="submit" onClick={handleLogin}>登录</Button>
           </DialogFooter>
       </DialogContent>
     </Dialog>

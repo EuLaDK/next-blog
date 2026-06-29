@@ -215,18 +215,14 @@ async function main() {
   await prisma.post.deleteMany()
   await prisma.tag.deleteMany()
   await prisma.category.deleteMany()
+  await prisma.authAccount.deleteMany()
+  await prisma.verificationCode.deleteMany()
   await prisma.user.deleteMany()
 
-  const author = await prisma.user.upsert({
-    where: {
-      email: "2585671067@qq.com",
-    },
-    update: {
+  const author = await prisma.user.create({
+    data: {
       name: "EuLaDK",
-    },
-    create: {
-      email: "2585671067@qq.com",
-      name: "EuLaDK",
+      role: "admin",
     },
   })
 

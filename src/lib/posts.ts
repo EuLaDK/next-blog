@@ -33,7 +33,6 @@ type PrismaBlogPost = {
   coverLabel: string
   author: {
     id: string
-    email: string
     name: string | null
   }
   category: PrismaBlogCategory
@@ -129,7 +128,7 @@ function getSectionsFromMarkdown(content: string): PostSection[] {
  * @param post 带分类、标签和作者关联的 Prisma 文章
  */
 export function mapPrismaPostToBlogPost(post: PrismaBlogPost): Post {
-  const authorName = post.author.name ?? post.author.email
+  const authorName = post.author.name ?? "匿名作者"
   const author: Author = {
     id: post.author.id,
     name: authorName,

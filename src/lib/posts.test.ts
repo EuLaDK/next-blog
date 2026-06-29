@@ -29,7 +29,6 @@ test("mapPrismaPostToBlogPost keeps taxonomy, cover, author, and sections for bl
     coverLabel: "Cache",
     author: {
       id: "author-1",
-      email: "2585671067@qq.com",
       name: "EuLaDK",
     },
     category: {
