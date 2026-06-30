@@ -1,11 +1,11 @@
-import { NextResponse } from 'next/server'
-import { cookies } from 'next/headers'
-import { signAccessToken, signRefreshToken } from '@/lib/jwt'
+// import { NextResponse } from 'next/server'
+// import { cookies } from 'next/headers'
+// import { signAccessToken, signRefreshToken } from '@/lib/jwt'
 
 
 export async function POST(request: Request) {
     try {
-        
+        console.log(request)
     } catch {
 
     }
