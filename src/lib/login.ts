@@ -1,4 +1,7 @@
+"use server";
+// 因为客户端组件有用到这个，所以必须要加use server不然会报错
 import prisma from "./prisma"
+
 
 export const addUser = async ({phone}:{phone: string}) => {
     // 先查询这个手机号有没有被注册
@@ -14,7 +17,7 @@ export const addUser = async ({phone}:{phone: string}) => {
         },
     })
     if (account) {
-        return account.user
+        return '该手机号已经被注册'
     }
     // 如果这个手机号没被注册就创建一个新的
     const user = await prisma.user.create({
@@ -28,5 +31,6 @@ export const addUser = async ({phone}:{phone: string}) => {
             }
         }
     })
-    console.log(user)
+    // 这里后面会处理一个状态码的问题，根据这个状态码来判断要返回的消息
+    return user
 }

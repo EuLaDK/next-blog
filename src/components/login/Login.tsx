@@ -15,6 +15,7 @@ import {
   InputGroupAddon,
   InputGroupInput,
 } from "@/components/ui/input-group"
+import { addUser } from '@/lib/login'
 import { Card } from '@/components/ui/card'
 import { Input } from "../ui/input"
 import { isMainlandChinaPhoneNumber } from "./phone-validation"
@@ -35,8 +36,13 @@ type LoginDialogProps = {
   onOpenChange: (open: boolean) => void
 }
 
-function handleLogin() {
-    console.log('登录成果')
+async function handleLogin(phone: string) {
+    try {
+      const res = await addUser({phone})
+      console.log(res)
+    } catch {
+      console.error('添加用户的过程中出现了问题')
+    }
 }
 
 export function LoginDialog({ open, onOpenChange }: LoginDialogProps) {
@@ -107,7 +113,7 @@ export function LoginDialog({ open, onOpenChange }: LoginDialogProps) {
             <DialogClose asChild>
               <Button className="w-25 h-10" type="button" variant="outline">取消</Button>
             </DialogClose>
-            <Button className="w-25 h-10" type="submit" onClick={handleLogin}>登录</Button>
+            <Button className="w-25 h-10" type="submit" onClick={() => handleLogin(phoneNumber)}>登录</Button>
           </DialogFooter>
       </DialogContent>
     </Dialog>
