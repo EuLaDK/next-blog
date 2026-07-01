@@ -29,6 +29,9 @@ export const Header = () => {
   const [mobileOpen, setMobileOpen] = useState(false)
   const [isLoginOpen, setIsLoginOpen] = useState(false)
   const search = searchParams.toString() ? `?${searchParams.toString()}` : ""
+  const loginQuery = searchParams.get("login")
+  const nextPath = searchParams.get("next")
+  const loginDialogOpen = isLoginOpen || loginQuery === "1"
 
   /**
    * 切换页面路由，并在移动端导航后关闭菜单。
@@ -40,9 +43,45 @@ export const Header = () => {
     setMobileOpen(false)
   }
 
+  /**
+   * 关闭登录弹窗，并在取消登录时清理 URL 上的登录提示参数。
+   * @param open 弹窗是否打开
+   */
+  const handleLoginOpenChange = (open: boolean) => {
+    setIsLoginOpen(open)
+
+    if (!open && loginQuery === "1") {
+      const nextSearchParams = new URLSearchParams(searchParams.toString())
+      nextSearchParams.delete("login")
+      nextSearchParams.delete("next")
+
+      const cleanUrl = nextSearchParams.toString() ? `${pathname}?${nextSearchParams.toString()}` : pathname
+      router.replace(cleanUrl, { scroll: false })
+    }
+  }
+
+  /**
+   * 登录成功后跳回 proxy 记录的原始访问路径。
+   */
+  const handleLoginSuccess = () => {
+    setIsLoginOpen(false)
+
+    if (nextPath?.startsWith("/") && !nextPath.startsWith("//")) {
+      router.replace(nextPath)
+      return
+    }
+
+    const nextSearchParams = new URLSearchParams(searchParams.toString())
+    nextSearchParams.delete("login")
+    nextSearchParams.delete("next")
+    const cleanUrl = nextSearchParams.toString() ? `${pathname}?${nextSearchParams.toString()}` : pathname
+
+    router.replace(cleanUrl, { scroll: false })
+  }
+
   return (
-    <div>
-    <header className="sticky top-0 z-40 border-b border-foreground/15 bg-background/80 backdrop-blur-xl">
+    <>
+      <header className="sticky top-0 z-40 border-b border-foreground/15 bg-background/80 backdrop-blur-xl">
       <div className="mx-auto flex h-16 w-full max-w-[1480px] items-center justify-between px-4 sm:px-6 lg:px-8">
         <button
           className="flex items-center gap-3 text-left"
@@ -141,7 +180,8 @@ export const Header = () => {
           </nav>
         </div>
       ) : null}
-    </header>
-    <LoginDialog open={isLoginOpen} onOpenChange={setIsLoginOpen} /></div>
+      </header>
+      <LoginDialog open={loginDialogOpen} onOpenChange={handleLoginOpenChange} onLoginSuccess={handleLoginSuccess} />
+    </>
   )
 }

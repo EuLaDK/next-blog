@@ -15,6 +15,7 @@ type PrismaBlogTag = {
 }
 
 type PrismaBlogPost = {
+  id: string
   slug: string
   title: string
   excerpt: string
@@ -49,7 +50,33 @@ export type BlogIndexData = {
   tags: Tag[]
 }
 
+type PostNavigationItem = {
+  slug: string
+  title: string
+}
+
+export type PostDetailData = {
+  post: Post
+  previous: PostNavigationItem | null
+  next: PostNavigationItem | null
+  relatedPosts: Post[]
+}
+
 const blogAccents = new Set<BlogAccent>(["teal", "yellow", "coral", "ink"])
+const postDetailInclude = {
+  author: true,
+  category: true,
+  tags: {
+    include: {
+      tag: true,
+    },
+  },
+} as const
+
+const postNavigationSelect = {
+  slug: true,
+  title: true,
+} as const
 
 /**
  * 把数据库中的颜色字符串限制到前台支持的封面色值。
@@ -177,15 +204,7 @@ export async function getBlogIndexData(): Promise<BlogIndexData> {
       where: {
         published: true,
       },
-      include: {
-        author: true,
-        category: true,
-        tags: {
-          include: {
-            tag: true,
-          },
-        },
-      },
+      include: postDetailInclude,
       orderBy: [{ featured: "desc" }, { publishedAt: "desc" }],
     }),
     prisma.category.findMany({
@@ -213,5 +232,77 @@ export async function getBlogIndexData(): Promise<BlogIndexData> {
       slug: tag.slug,
       name: tag.name,
     })),
+  }
+}
+
+/**
+ * 根据 slug 读取详情页需要的文章、上一篇、下一篇和相似文章。
+ * @param slug 动态路由里的文章 slug
+ */
+export const getPostDetailBySlug = async (slug: string): Promise<PostDetailData | null> => {
+  try {
+    const { default: prisma } = await import("./prisma")
+    const currentArticle = await prisma.post.findFirst({
+      where: {
+        slug,
+        published: true,
+      },
+      include: postDetailInclude,
+    })
+
+    if (!currentArticle) {
+      return null
+    }
+
+    const currentPublishedAt = currentArticle.publishedAt ?? currentArticle.createdAt
+    const [previous, next, relatedPosts] = await Promise.all([
+      prisma.post.findFirst({
+        where: {
+          published: true,
+          id: {
+            not: currentArticle.id,
+          },
+          publishedAt: {
+            lt: currentPublishedAt,
+          },
+        },
+        orderBy: [{ publishedAt: "desc" }, { createdAt: "desc" }],
+        select: postNavigationSelect,
+      }),
+      prisma.post.findFirst({
+        where: {
+          published: true,
+          id: {
+            not: currentArticle.id,
+          },
+          publishedAt: {
+            gt: currentPublishedAt,
+          },
+        },
+        orderBy: [{ publishedAt: "asc" }, { createdAt: "asc" }],
+        select: postNavigationSelect,
+      }),
+      prisma.post.findMany({
+        where: {
+          published: true,
+          categoryId: currentArticle.categoryId,
+          id: {
+            not: currentArticle.id,
+          },
+        },
+        include: postDetailInclude,
+        orderBy: [{ popularityScore: "desc" }, { publishedAt: "desc" }],
+        take: 3,
+      }),
+    ])
+
+    return {
+      post: mapPrismaPostToBlogPost(currentArticle),
+      previous,
+      next,
+      relatedPosts: relatedPosts.map(mapPrismaPostToBlogPost),
+    }
+  } catch {
+    throw new Error("查询文章详情失败")
   }
 }

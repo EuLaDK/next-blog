@@ -15,7 +15,7 @@ import {
   InputGroupAddon,
   InputGroupInput,
 } from "@/components/ui/input-group"
-import { addUser } from '@/lib/login'
+// import { addUser } from '@/lib/login'
 import { Card } from '@/components/ui/card'
 import { Input } from "../ui/input"
 import { isMainlandChinaPhoneNumber } from "./phone-validation"
@@ -34,20 +34,15 @@ function createCaptchaCode(length = 4): string {
 type LoginDialogProps = {
   open: boolean
   onOpenChange: (open: boolean) => void
+  onLoginSuccess?: () => void
 }
 
-async function handleLogin(phone: string) {
-    try {
-      const res = await addUser({phone})
-      console.log(res)
-    } catch {
-      console.error('添加用户的过程中出现了问题')
-    }
-}
-
-export function LoginDialog({ open, onOpenChange }: LoginDialogProps) {
+export function LoginDialog({ open, onOpenChange, onLoginSuccess }: LoginDialogProps) {
   const [phoneNumber, setPhoneNumber] = useState("")
+  const [captchaInput, setCaptchaInput] = useState("")
   const [captchaCode, setCaptchaCode] = useState(() => createCaptchaCode())
+  const [loginError, setLoginError] = useState("")
+  const [submitting, setSubmitting] = useState(false)
   const hasPhoneError = phoneNumber.length > 0 && !isMainlandChinaPhoneNumber(phoneNumber)
 
   /**
@@ -55,6 +50,49 @@ export function LoginDialog({ open, onOpenChange }: LoginDialogProps) {
    */
   const refreshCaptchaCode = () => {
     setCaptchaCode(createCaptchaCode())
+  }
+
+  /**
+   * 校验登录表单并请求手机号登录接口。
+   */
+  const handleLogin = async () => {
+    setLoginError("")
+
+    if (!isMainlandChinaPhoneNumber(phoneNumber)) {
+      setLoginError("请输入正确的手机号")
+      return
+    }
+
+    if (captchaInput.trim().toUpperCase() !== captchaCode) {
+      setLoginError("验证码不正确，请重新输入")
+      refreshCaptchaCode()
+      return
+    }
+
+    setSubmitting(true)
+
+    try {
+      const response = await fetch("/api/auth/login", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          phone: phoneNumber,
+        }),
+      })
+
+      if (!response.ok) {
+        setLoginError("登录失败，请稍后重试")
+        return
+      }
+
+      onLoginSuccess?.()
+    } catch {
+      setLoginError("登录失败，请检查网络后重试")
+    } finally {
+      setSubmitting(false)
+    }
   }
 
   return (
@@ -86,7 +124,13 @@ export function LoginDialog({ open, onOpenChange }: LoginDialogProps) {
                   ) : null}
                 </div>
           <div className="flex flex-row gap-2">
-            <Input className="h-12" id="input-button-group" placeholder="请输入验证码" />
+            <Input
+              className="h-12"
+              id="input-button-group"
+              placeholder="请输入验证码"
+              value={captchaInput}
+              onChange={(event) => setCaptchaInput(event.target.value)}
+            />
             <button
               className="h-12 min-w-30 rounded-lg border border-foreground/15 bg-blue-100 px-4 text-center font-mono text-lg font-black tracking-[0.18em] text-foreground transition hover:border-foreground/35 hover:bg-[oklch(0.86_0.07_174)]"
               type="button"
@@ -97,6 +141,7 @@ export function LoginDialog({ open, onOpenChange }: LoginDialogProps) {
               {captchaCode}
             </button>
           </div>
+          {loginError ? <p className="text-xs font-medium text-destructive">{loginError}</p> : null}
             </div>
             <Card className="flex flex-col w-60 h-69 pt-9 px-6 items-center">
                 <div className="w-full flex-1 h-full bg-blue-300">
@@ -113,7 +158,9 @@ export function LoginDialog({ open, onOpenChange }: LoginDialogProps) {
             <DialogClose asChild>
               <Button className="w-25 h-10" type="button" variant="outline">取消</Button>
             </DialogClose>
-            <Button className="w-25 h-10" type="submit" onClick={() => handleLogin(phoneNumber)}>登录</Button>
+            <Button className="w-25 h-10" type="button" disabled={submitting} onClick={handleLogin}>
+              {submitting ? "登录中" : "登录"}
+            </Button>
           </DialogFooter>
       </DialogContent>
     </Dialog>

@@ -1,4 +1,4 @@
-"use server";
+// "use server";
 // 因为客户端组件有用到这个，所以必须要加use server不然会报错
 import prisma from "./prisma"
 
@@ -17,7 +17,7 @@ export const addUser = async ({phone}:{phone: string}) => {
         },
     })
     if (account) {
-        return '该手机号已经被注册'
+        return account.user
     }
     // 如果这个手机号没被注册就创建一个新的
     const user = await prisma.user.create({

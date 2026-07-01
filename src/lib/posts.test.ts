@@ -1,10 +1,11 @@
 import assert from "node:assert/strict"
 import test from "node:test"
 
-import { mapPrismaPostToBlogPost } from "./posts.ts"
+import { getPostDetailBySlug, mapPrismaPostToBlogPost } from "./posts.ts"
 
 test("mapPrismaPostToBlogPost keeps taxonomy, cover, author, and sections for blog UI", () => {
   const post = mapPrismaPostToBlogPost({
+    id: "post-1",
     slug: "nextjs-cache-field-notes",
     title: "Next.js 缓存策略田野笔记",
     excerpt: "记录缓存策略。",
@@ -63,4 +64,8 @@ test("mapPrismaPostToBlogPost keeps taxonomy, cover, author, and sections for bl
     post.sections.map((section) => section.title),
     ["第一段", "第二段"],
   )
+})
+
+test("exports getPostDetailBySlug for post detail pages", () => {
+  assert.equal(typeof getPostDetailBySlug, "function")
 })

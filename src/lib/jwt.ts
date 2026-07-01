@@ -23,7 +23,7 @@ export async function signRefreshToken(payload: UserPayload): Promise<string> {
     .setProtectedHeader({alg: 'HS256'})
     .setIssuedAt()
     .setExpirationTime('7d') // 一周过期
-    .sign(ASSESS_SECRET);
+    .sign(REFRESH_SECRET);
 }
 
 // 验证 Access Token
@@ -44,4 +44,14 @@ export async function verifyRefreshToken(token: string): Promise<UserPayload | n
     } catch {
         return null
     }
+}
+
+// 刷新 accessToken
+export async function refreshAccessToken(refreshToken: string) {
+    const payload = await verifyRefreshToken(refreshToken)
+    if (!payload) return null
+
+    const { userId, username } = payload
+    const newAccessToken = await signAccessToken({ userId, username })
+    return newAccessToken
 }
